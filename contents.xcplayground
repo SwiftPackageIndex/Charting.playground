@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<playground version='6.0' target-platform='macos' buildActiveScheme='true' importAppTypes='true'>
+    <pages>
+        <page name='DocC size + file count'/>
+        <page name='DocC S3 storage'/>
+        <page name='Google visitor ratio'/>
+        <page name='Homepage visitor ratio'/>
+        <page name='Post Plausible event'/>
+        <page name='API reporting'/>
+        <page name='Release frequency'/>
+        <page name='Version history'/>
+        <page name='Release count'/>
+    </pages>
+</playground>
