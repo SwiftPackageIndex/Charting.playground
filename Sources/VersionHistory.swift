@@ -105,6 +105,15 @@ public enum VersionHistory {
         }
         return sum / Double(records.count - 1)
     }
+
+    public static func maintenance(_ records: [Record]) -> TimeInterval? {
+        let records = records
+            .filter({ $0.release != nil })
+            .sorted(by: { $0.releaseDate < $1.releaseDate })
+        guard records.count > 1 else { return nil }
+        return records.last!.releaseDate.timeIntervalSince(records.first!.releaseDate)
+    }
+
 }
 
 
