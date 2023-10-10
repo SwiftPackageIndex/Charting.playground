@@ -15,7 +15,7 @@ public enum VersionHistory {
     public struct Record: Codable {
         public var packageId: String
         public var packageName: String
-        public var release: String
+        public var release: String?
         public var releaseDate: Date
     }
 
@@ -34,7 +34,7 @@ public enum VersionHistory {
         struct RawRecord: Codable {
             var packageId: String
             var packageName: String?
-            var release: String
+            var release: String?
             var releaseDate: String
 
             var record: Record? {
@@ -86,6 +86,5 @@ public enum VersionHistory {
             )
         }
     }
-
 
 }

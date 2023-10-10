@@ -21,12 +21,12 @@ func binnedData(data: [Int], max: Int) -> [(index: Int, range: ChartBinRange<Int
 let rawData = try VersionHistory.loadData()
 let versionCounts = Array(
     Dictionary(grouping: rawData, by: \.packageId)
-        .mapValues(\.count)
+        .mapValues { $0.filter({ $0.release != nil }).count }
         .values
 )
 
 
-struct VersionCountChart: View {
+struct ReleaseCountChart: View {
     var body: some View {
         Chart(binnedData(data: versionCounts, max: 99),
               id: \.index) { element in
@@ -50,15 +50,12 @@ struct Page: View {
             Text("Release count distribution")
                 .font(.title.bold())
 
-//            Text("Release count")
-//                .font(.title2)
-//                .padding(.top)
-            VersionCountChart()
+            ReleaseCountChart()
         }
     }
 }
 
 
 PlaygroundPage.current.setLiveView(
-    Canvas(page: Page(), filename: "release-graphs", width: 600, height: 600)
+    Canvas(page: Page(), filename: "release-count-distribution", width: 600, height: 600)
 )
