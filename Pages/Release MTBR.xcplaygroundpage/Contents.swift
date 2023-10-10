@@ -5,9 +5,9 @@ import PlaygroundSupport
 
 
 
-func binnedData(data: [Int], max: Int) -> [(index: Int, range: ChartBinRange<Int>, frequency: Int)] {
-    let bins = NumberBins(range: 0...max, count: max)
-    let groups = Dictionary(grouping: data.filter({ $0 <= max}), by: bins.index(for:))
+func binnedData(data: [Double], desiredCount: Int) -> [(index: Int, range: ChartBinRange<Double>, frequency: Int)] {
+    let bins = NumberBins(data: data, desiredCount: desiredCount)
+    let groups = Dictionary(grouping: data, by: bins.index(for:))
     return groups.map { key, values in
         (
             index: key,
@@ -19,23 +19,22 @@ func binnedData(data: [Int], max: Int) -> [(index: Int, range: ChartBinRange<Int
 
 
 let rawData = try VersionHistory.loadData()
-let versionCounts = Array(
+let mtbr = Array(
     Dictionary(grouping: rawData, by: \.packageId)
-        .mapValues(VersionHistory.releaseCount)
+        .mapValues(VersionHistory.mtbr)
+        .compactMapValues(\.?.inDays)
         .values
 )
 
-
-struct ReleaseCountChart: View {
+struct MTBRChart: View {
     var body: some View {
-        Chart(binnedData(data: versionCounts, max: 99),
-              id: \.index) { element in
+        Chart(binnedData(data: mtbr, desiredCount: 100), id: \.index) { element in
             BarMark(
                 x: .value("", element.range),
                 y: .value("", element.frequency)
             )
         }
-        .chartXAxisLabel("Release count", position: .bottom, alignment: .center)
+        .chartXAxisLabel("Mean time between releases / days", position: .bottom, alignment: .center)
         .chartYAxisLabel("Package count", position: .trailing, alignment: .center)
     }
 }
@@ -47,15 +46,15 @@ struct Page: View {
             Text("Swift Package Index")
                 .font(.callout)
                 .foregroundStyle(.secondary)
-            Text("Release count distribution")
+            Text("Mean time between releases")
                 .font(.title.bold())
 
-            ReleaseCountChart()
+            MTBRChart()
         }
     }
 }
 
 
 PlaygroundPage.current.setLiveView(
-    Canvas(page: Page(), filename: "release-count-distribution", width: 600, height: 600)
+    Canvas(page: Page(), filename: "mtbr", width: 600, height: 600)
 )

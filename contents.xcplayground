@@ -10,5 +10,6 @@
         <page name='Release frequency'/>
         <page name='Version history'/>
         <page name='Release count'/>
+        <page name='Release MTBR'/>
     </pages>
 </playground>

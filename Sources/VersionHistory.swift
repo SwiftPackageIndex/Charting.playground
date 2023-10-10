@@ -87,4 +87,27 @@ public enum VersionHistory {
         }
     }
 
+    public static func releaseCount(_ records: [Record]) -> Int {
+        records.filter({ $0.release != nil }).count
+    }
+
+    public static func mtbr(_ records: [Record]) -> TimeInterval? {
+        let records = records
+            .filter({ $0.release != nil })
+            .sorted(by: { $0.releaseDate < $1.releaseDate })
+        guard records.count > 2 else { return nil }
+        //        for r in records { print(r) }
+        var sum: TimeInterval = 0
+        for (current, next) in zip(records, records.dropFirst()) {
+            let delta = next.releaseDate.timeIntervalSince(current.releaseDate)
+            //            print("\(delta.inDays) days")
+            sum += delta
+        }
+        return sum / Double(records.count - 1)
+    }
+}
+
+
+extension TimeInterval {
+    public var inDays: Double { self / 3600 / 24 }
 }
