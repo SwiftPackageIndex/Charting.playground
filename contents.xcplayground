@@ -12,5 +12,6 @@
         <page name='Release count'/>
         <page name='Release MTBR'/>
         <page name='Release maintenance'/>
+        <page name='Days since last release'/>
     </pages>
 </playground>

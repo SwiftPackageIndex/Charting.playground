@@ -114,6 +114,15 @@ public enum VersionHistory {
         return records.last!.releaseDate.timeIntervalSince(records.first!.releaseDate)
     }
 
+    public static func timeSinceLastRelease(_ records: [Record]) -> TimeInterval? {
+        let dataSnapshotDate = dateFormatter.date(from: "2023-10-10 15:00:00+00")!
+        let records = records
+            .filter({ $0.release != nil })
+            .sorted(by: { $0.releaseDate < $1.releaseDate })
+        guard !records.isEmpty else { return nil }
+        return dataSnapshotDate.timeIntervalSince(records.last!.releaseDate)
+    }
+
 }
 
 
