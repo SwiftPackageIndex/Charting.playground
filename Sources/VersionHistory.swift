@@ -12,7 +12,16 @@ public enum VersionHistory {
         return formatter
     }()
 
+    static let dateFormatterWithMicroSeconds: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSSSSS+00"
+        formatter.locale = .init(identifier: "en_GB")
+        formatter.timeZone = .gmt
+        return formatter
+    }()
+
     public struct Record: Codable {
+        public var packageCreatedAt: Date
         public var packageId: String
         public var packageName: String
         public var release: String?
@@ -32,6 +41,7 @@ public enum VersionHistory {
         //    order by package_name, commit_date desc
 
         struct RawRecord: Codable {
+            var packageCreatedAt: String
             var packageId: String
             var packageName: String?
             var release: String?
@@ -39,10 +49,17 @@ public enum VersionHistory {
 
             var record: Record? {
                 guard let releaseDate = VersionHistory.dateFormatter.date(from: releaseDate) else { return nil }
-                return .init(packageId: packageId,
-                             packageName: packageName ?? "nil",
-                             release: release,
-                             releaseDate: releaseDate)
+                guard let packageCreatedAt = VersionHistory.dateFormatterWithMicroSeconds.date(from: packageCreatedAt) else {
+                    print("failed to parse packageCreatedAt: \(packageCreatedAt), id: \(packageId)")
+                    return nil
+                }
+                return .init(
+                    packageCreatedAt: packageCreatedAt,
+                    packageId: packageId,
+                    packageName: packageName ?? "nil",
+                    release: release,
+                    releaseDate: releaseDate
+                )
             }
         }
 
@@ -88,10 +105,12 @@ public enum VersionHistory {
     }
 
     public static func releaseCount(_ records: [Record]) -> Int {
-        records.filter({ $0.release != nil }).count
+        assert(Set(records.map(\.packageId)).count == 1, "All records must belong to the same package")
+        return records.filter({ $0.release != nil }).count
     }
 
     public static func mtbr(_ records: [Record]) -> TimeInterval? {
+        assert(Set(records.map(\.packageId)).count == 1, "All records must belong to the same package")
         let records = records
             .filter({ $0.release != nil })
             .sorted(by: { $0.releaseDate < $1.releaseDate })
@@ -107,6 +126,7 @@ public enum VersionHistory {
     }
 
     public static func maintenance(_ records: [Record]) -> TimeInterval? {
+        assert(Set(records.map(\.packageId)).count == 1, "All records must belong to the same package")
         let records = records
             .filter({ $0.release != nil })
             .sorted(by: { $0.releaseDate < $1.releaseDate })
@@ -115,12 +135,22 @@ public enum VersionHistory {
     }
 
     public static func timeSinceLastRelease(_ records: [Record]) -> TimeInterval? {
+        assert(Set(records.map(\.packageId)).count == 1, "All records must belong to the same package")
         let dataSnapshotDate = dateFormatter.date(from: "2023-10-10 15:00:00+00")!
         let records = records
             .filter({ $0.release != nil })
             .sorted(by: { $0.releaseDate < $1.releaseDate })
         guard !records.isEmpty else { return nil }
         return dataSnapshotDate.timeIntervalSince(records.last!.releaseDate)
+    }
+
+    public static func releaseCountAfterAdding(_ records: [Record]) -> Int {
+        assert(Set(records.map(\.packageId)).count == 1, "All records must belong to the same package")
+        guard let first = records.first else { return 0 }
+        let dateAdded = first.packageCreatedAt
+        return records
+            .filter({ $0.releaseDate >= dateAdded })
+            .count
     }
 
 }
