@@ -159,3 +159,11 @@ public enum VersionHistory {
 extension TimeInterval {
     public var inDays: Double { self / 3600 / 24 }
 }
+
+
+extension [VersionHistory.Record] {
+    public func indexingDates() -> [String: Date] {
+        Dictionary(grouping: self, by: \.packageId)
+            .compactMapValues { $0.first?.packageCreatedAt }
+    }
+}

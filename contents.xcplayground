@@ -7,8 +7,8 @@
         <page name='Homepage visitor ratio'/>
         <page name='Post Plausible event'/>
         <page name='API reporting'/>
-        <page name='Release frequency'/>
         <page name='Version history'/>
+        <page name='Release frequency'/>
         <page name='Release count'/>
         <page name='Release MTBR'/>
         <page name='Release maintenance'/>

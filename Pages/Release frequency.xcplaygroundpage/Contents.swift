@@ -4,12 +4,42 @@ import Charts
 import PlaygroundSupport
 
 
-let releaseData = try VersionHistory.loadData().map(\.releaseDate)
+let records = try VersionHistory.loadData()
+
+let indexingDates = records.indexingDates()
+let releaseDatesAfterIndexing = records.filter { record in
+    record.release != nil && (record.releaseDate >= indexingDates[record.packageId]!)
+}
+    .map(\.releaseDate)
+    .sorted()
+let start = releaseDatesAfterIndexing.first!
+let end = releaseDatesAfterIndexing.last!
+let range = Calendar.current.dateComponents([.day], from: start, to: end).day!
+
+let allReleaseDates = records.map(\.releaseDate)
+    .filter {
+        start <= $0 && $0 <= end
+    }
 
 
-struct ReleaseFrequencyChart: View {
+//struct ReleaseFrequencyByDayChart: View {
+//    var body: some View {
+//        Chart(VersionHistory.bin(data: allReleaseDates, days: 1505, binSize: 1),
+//              id: \.index) { element in
+//            BarMark(
+//                x: .value("Date", element.range),
+//                y: .value("Count", element.frequency)
+//            )
+//        }
+//        .chartXAxisLabel("Date", position: .bottom, alignment: .center)
+//        .chartYAxisLabel("Count / day", position: .trailing, alignment: .center)
+//    }
+//}
+
+
+struct ReleaseFrequencyByWeekChart: View {
     var body: some View {
-        Chart(VersionHistory.bin(data: releaseData, days: 1505, binSize: 1),
+        Chart(VersionHistory.bin(data: allReleaseDates, days: range, binSize: 7),
               id: \.index) { element in
             BarMark(
                 x: .value("Date", element.range),
@@ -17,9 +47,14 @@ struct ReleaseFrequencyChart: View {
             )
         }
         .chartXAxisLabel("Date", position: .bottom, alignment: .center)
-        .chartYAxisLabel("Count / day", position: .trailing, alignment: .center)
+        .chartYAxisLabel("Count / week", position: .trailing, alignment: .center)
+    }
+}
 
-        Chart(VersionHistory.bin(data: releaseData, days: 1505, binSize: 7),
+
+struct ReleaseFrequencyAfterIndexingChart: View {
+    var body: some View {
+        Chart(VersionHistory.bin(data: releaseDatesAfterIndexing, days: range, binSize: 7),
               id: \.index) { element in
             BarMark(
                 x: .value("Date", element.range),
@@ -41,7 +76,20 @@ struct Page: View {
             Text("Release frequency over time")
                 .font(.title.bold())
 
-            ReleaseFrequencyChart()
+//            Text("Release frequency by day")
+//                .font(.title2)
+//                .padding(.top)
+//            ReleaseFrequencyByDayChart()
+
+            Text("Release frequency – all releases")
+                .font(.title2)
+                .padding(.top)
+            ReleaseFrequencyByWeekChart()
+
+            Text("Release frequency – after indexing")
+                .font(.title2)
+                .padding(.top)
+            ReleaseFrequencyAfterIndexingChart()
         }
     }
 }
