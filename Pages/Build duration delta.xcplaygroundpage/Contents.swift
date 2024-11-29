@@ -86,7 +86,7 @@ struct BuildDurationDeltaChart: View {
                                                    .v6_0,
                                                    .v5_10,
                                                    scale: .percent),
-                         max: 200,
+                         max: 600,
                          count: 60),
               id: \.index) { element in
             BarMark(
@@ -113,7 +113,7 @@ struct Page: View {
                 .font(.title2)
                 .padding(.top)
             BuildDurationDeltaChart(platform: .macOS)
-                    .chartXScale(domain: [-200, 200])
+                    .chartXScale(domain: [-200, 600])
         }
     }
 }
